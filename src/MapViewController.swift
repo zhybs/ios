@@ -70,6 +70,7 @@ open class MapViewController: UIViewController, LocationManagerDelegate {
   open static let MapzenGeneralErrorDomain = "MapzenGeneralErrorDomain"
   private static let mapzenRights = "https://mapzen.com/rights/"
 
+  var application : ApplicationProtocol = UIApplication.shared
   open var tgViewController: TGMapViewController = TGMapViewController()
   var currentLocationGem: TGMapMarkerId?
   var lastSetPoint: TGGeoPoint?
@@ -78,6 +79,7 @@ open class MapViewController: UIViewController, LocationManagerDelegate {
   open var shouldFollowCurrentLocation = false
   open var findMeButton = UIButton(type: .custom)
   open var currentAnnotations: [PeliasMapkitAnnotation : TGMapMarkerId] = Dictionary()
+  open var attributionBtn = UIButton()
 
   open var cameraType: TGCameraType {
     set {
@@ -493,6 +495,34 @@ open class MapViewController: UIViewController, LocationManagerDelegate {
     tgViewController.markerRemove(marker)
     return
   }
+
+  //MARK: - private
+
+  private func setupTgControllerView() {
+    tgViewController.view.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height-tabBarHeight)
+    self.view.addSubview(tgViewController.view)
+  }
+
+  private func setupAttribution() {
+    attributionBtn = UIButton()
+    attributionBtn.setTitle(NSLocalizedString("attribution", comment: "Mapzen Attribution"), for: .normal)
+    attributionBtn.setTitleColor(.darkGray, for: .normal)
+    attributionBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+    attributionBtn.addTarget(self, action: #selector(openMapzenTerms), for: .touchUpInside)
+    attributionBtn.sizeToFit()
+    attributionBtn.translatesAutoresizingMaskIntoConstraints = false
+    mapView.addSubview(attributionBtn)
+
+    let horizontalConstraint = attributionBtn.leftAnchor.constraint(equalTo: mapView.leftAnchor, constant: Dimens.defaultPadding)
+    let verticalConstraint = attributionBtn.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -Dimens.defaultPadding)
+    NSLayoutConstraint.activate([horizontalConstraint, verticalConstraint])
+  }
+
+  @objc private func openMapzenTerms() {
+    guard let url = URL(string: MapViewController.mapzenRights) else { return }
+    let _ = application.openURL(url)
+  }
+
 }
 
 extension MapViewController : TGMapViewDelegate, TGRecognizerDelegate {
@@ -591,34 +621,6 @@ extension MapViewController : TGMapViewDelegate, TGRecognizerDelegate {
   
   open func mapView(_ view: TGMapViewController, recognizer: UIGestureRecognizer, didRecognizeShoveGesture displacement: CGPoint) {
     shoveDelegate?.mapController(self, didShoveMap: displacement)
-  }
-
-  //MARK: - private
-
-  private func setupTgControllerView() {
-    tgViewController.view.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height-tabBarHeight)
-    self.view.addSubview(tgViewController.view)
-  }
-
-  private func setupAttribution() {
-    let attributionBtn = UIButton()
-    attributionBtn.setTitle(NSLocalizedString("attribution", comment: "Mapzen Attribution"), for: .normal)
-    attributionBtn.setTitleColor(.darkGray, for: .normal)
-    attributionBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-    attributionBtn.addTarget(self, action: #selector(openMapzenTerms), for: .touchUpInside)
-    attributionBtn.sizeToFit()
-    attributionBtn.translatesAutoresizingMaskIntoConstraints = false
-    mapView.addSubview(attributionBtn)
-
-    let horizontalConstraint = attributionBtn.leftAnchor.constraint(equalTo: mapView.leftAnchor, constant: Dimens.defaultPadding)
-    let verticalConstraint = attributionBtn.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -Dimens.defaultPadding)
-    NSLayoutConstraint.activate([horizontalConstraint, verticalConstraint])
-  }
-
-  @objc private func openMapzenTerms() {
-    let url = URL(string: MapViewController.mapzenRights)
-    if url == nil { return }
-    UIApplication.shared.openURL(url!)
   }
 }
 
