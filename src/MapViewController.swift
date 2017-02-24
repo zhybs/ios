@@ -608,7 +608,7 @@ extension MapViewController : TGMapViewDelegate, TGRecognizerDelegate {
     attributionBtn.addTarget(self, action: #selector(openMapzenTerms), for: .touchUpInside)
     attributionBtn.sizeToFit()
     attributionBtn.translatesAutoresizingMaskIntoConstraints = false
-    self.view.addSubview(attributionBtn)
+    mapView.addSubview(attributionBtn)
 
     let horizontalConstraint = attributionBtn.leftAnchor.constraint(equalTo: mapView.leftAnchor, constant: Dimens.defaultPadding)
     let verticalConstraint = attributionBtn.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -Dimens.defaultPadding)
